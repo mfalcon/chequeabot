@@ -32,7 +32,8 @@ def get_tagged_sentences(folder):
         with open(filename, 'rb') as tagged_file:
             parsed_sentences = parsed_sentences + pickle.load(tagged_file)
     return parsed_sentences 
-    
+
+
 def dump_classifier(folder, classifier,description=""):
     # Once created, it will dump the clasifier into a pickle.
     # Change the name to whatever you see fit
@@ -44,7 +45,8 @@ def dump_classifier(folder, classifier,description=""):
     f_desc = open(folder + name.replace("pickle","txt"),"w+")
     f_desc.write(description)
     f_desc.close()
-    
+
+
 def show_metrics(classifier, test_set):    
     description = ""
     # Given a classifier and a set to test it, it will print metrics for the classifier
@@ -77,9 +79,11 @@ def show_metrics(classifier, test_set):
     print(description)
 
     # informative
-    classifier.show_most_informative_features(25)
+    if hasattr(classifier, 'show_most_informative_features'):
+        classifier.show_most_informative_features(25)
 
     return description
+
 
 def split_dataset(dataset):
     # Given a dataset, it will split it according to test and train percentage
@@ -96,32 +100,16 @@ def split_dataset(dataset):
 
     return train_values,test_values
 
+
 if __name__ == "__main__":
     # Load the dataset from pickles and extract features
     tagged_sentences = get_tagged_sentences(POS_TAGGED_FOLDER)
     dataset = [(automatic_feature_extractor(sent['pos_tag'], pos_ngrams=False), sent['classification']) for sent in tagged_sentences]
     
-    # Train the classifier on "n" folds and establish an average accuracy
-    # This process is to get ony that accuracy number
-    accuracys = []
-    folds = 10
-    for i in range(folds):
-        train_set, test_set = split_dataset(dataset)
-        #classifier = nltk.NaiveBayesClassifier.train(train_set)
-        MNB_classifier = SklearnClassifier(LinearSVC())
-        classifier = MNB_classifier.train(train_set)
-        accuracys.append(nltk.classify.accuracy(classifier, test_set))
-    accuracy = sum(accuracys)/len(accuracys)
-    print("Accuracy after " + str(folds) + " folds: " + str(accuracy))
 
     # Train again a model for specific metrics
     train_set, test_set = split_dataset(dataset)
-    #classifier = nltk.NaiveBayesClassifier.train(train_set)
-    #classifier = nltk.NaiveBayesClassifier.train(train_set)
-    MNB_classifier = SklearnClassifier(LinearSVC())
-    classifier = MNB_classifier.train(train_set)
+    #text_classifier = nltk.NaiveBayesClassifier.train(train_set)
+    text_classifier = SklearnClassifier(BernoulliNB())
+    classifier = text_classifier.train(train_set)
     description = show_metrics(classifier,test_set)
-
-    # finally train the model with the full dataset
-    classifier = nltk.NaiveBayesClassifier.train(dataset)
-    dump_classifier(CLASSIFIERS_FOLDER, classifier,description)
