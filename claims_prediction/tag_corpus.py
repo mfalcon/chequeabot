@@ -19,7 +19,7 @@ from constants import TAGGED_FOLDER,POS_TAGGED_FOLDER, SPACY_FOLDER
 
 sys.path.append(SPACY_FOLDER)
 from pos_tagger import pos_tag
-import feature_extractors
+
 
 # TO USE A DIFFERENT LANGUAGE:
 # 1- Create a folder named as the language code (example: "en") in the tagged_corpus and pos_sentences folder.

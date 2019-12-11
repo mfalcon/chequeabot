@@ -27,7 +27,7 @@ def automatic_feature_extractor(spacy_tag, pos_ngrams=False):
 
     if pos_ngrams:        
         ctags_chain = [e['pos'] for e in spacy_tag]
-        ngs = ngrams(ctags_chain, 3)
+        ngs = ngrams(ctags_chain, 4)
         for ng in ngs:
             features[ng] = True
    

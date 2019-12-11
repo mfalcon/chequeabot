@@ -18,6 +18,13 @@ sys.path.append(SPACY_FOLDER)
 from feature_extractors import automatic_feature_extractor
 from pos_tagger import pos_tag
 
+from nltk.classify.scikitlearn import SklearnClassifier
+from sklearn.naive_bayes import MultinomialNB, BernoulliNB
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression,SGDClassifier
+from sklearn.svm import SVC, LinearSVC, NuSVC
+
+
 def get_tagged_sentences(folder):
     # Load all the tagged sentences included in the .pickle files 
     parsed_sentences = []
@@ -55,11 +62,12 @@ def show_metrics(classifier, test_set):
 
     model_precision =  int(precision(refsets['fact-checkable'], testsets['fact-checkable'])*100)    
     model_recall =  int(recall(refsets['fact-checkable'], testsets['fact-checkable'])*100)
-    model_f_measure =  int(f_measure(refsets['fact-checkable'], testsets['fact-checkable'],0.3)*100)
+    #model_f_measure =  int(f_measure(refsets['fact-checkable'], testsets['fact-checkable'],0.3)*100)
+    model_f_measure =  f_measure(refsets['fact-checkable'], testsets['fact-checkable'],0.3)*100
     
     description += "\n" + "PRECISION: Of the sentences predicted fact-checkable, " + str(model_precision) + "% were actually fact-checkable"
     description += "\n" + "RECALL: Of the sentences that were fact-checkable, " + str(model_recall) + "% were predicted correctly"
-    description += "\n" + "F-MEASURE (balance between precission and recall): " + str(model_f_measure) + "%"
+    description += "\n" + "F-MEASURE (balance between precision and recall): " + str(model_f_measure) + "%"
 
     # Same for non fact-checkables
     #print('non-fact-checkable precision:', precision(refsets['non-fact-checkable'], testsets['non-fact-checkable']))
@@ -91,7 +99,7 @@ def split_dataset(dataset):
 if __name__ == "__main__":
     # Load the dataset from pickles and extract features
     tagged_sentences = get_tagged_sentences(POS_TAGGED_FOLDER)
-    dataset = [(automatic_feature_extractor(sent['pos_tag'], pos_ngrams=True), sent['classification']) for sent in tagged_sentences]
+    dataset = [(automatic_feature_extractor(sent['pos_tag'], pos_ngrams=False), sent['classification']) for sent in tagged_sentences]
     
     # Train the classifier on "n" folds and establish an average accuracy
     # This process is to get ony that accuracy number
@@ -99,14 +107,19 @@ if __name__ == "__main__":
     folds = 10
     for i in range(folds):
         train_set, test_set = split_dataset(dataset)
-        classifier = nltk.NaiveBayesClassifier.train(train_set)
+        #classifier = nltk.NaiveBayesClassifier.train(train_set)
+        MNB_classifier = SklearnClassifier(LinearSVC())
+        classifier = MNB_classifier.train(train_set)
         accuracys.append(nltk.classify.accuracy(classifier, test_set))
     accuracy = sum(accuracys)/len(accuracys)
     print("Accuracy after " + str(folds) + " folds: " + str(accuracy))
 
     # Train again a model for specific metrics
     train_set, test_set = split_dataset(dataset)
-    classifier = nltk.NaiveBayesClassifier.train(train_set)
+    #classifier = nltk.NaiveBayesClassifier.train(train_set)
+    #classifier = nltk.NaiveBayesClassifier.train(train_set)
+    MNB_classifier = SklearnClassifier(LinearSVC())
+    classifier = MNB_classifier.train(train_set)
     description = show_metrics(classifier,test_set)
 
     # finally train the model with the full dataset
