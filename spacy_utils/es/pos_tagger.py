@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
+
 import spacy
+
 nlp = spacy.load('es_core_news_md')
+
 
 def pos_tag(frase):
     frase = frase.decode('utf8')
-    #doc = nlp(frase,disable=['parser','nec'])
     doc = nlp(frase)
     tags = []
     for token in doc:

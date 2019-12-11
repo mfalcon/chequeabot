@@ -21,7 +21,7 @@ from pos_tagger import pos_tag
 from nltk.classify.scikitlearn import SklearnClassifier
 from sklearn.naive_bayes import MultinomialNB, BernoulliNB
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression,SGDClassifier
+from sklearn.linear_model import LogisticRegression, SGDClassifier
 from sklearn.svm import SVC, LinearSVC, NuSVC
 
 
@@ -71,11 +71,6 @@ def show_metrics(classifier, test_set):
     description += "\n" + "RECALL: Of the sentences that were fact-checkable, " + str(model_recall) + "% were predicted correctly"
     description += "\n" + "F-MEASURE (balance between precision and recall): " + str(model_f_measure) + "%"
 
-    # Same for non fact-checkables
-    #print('non-fact-checkable precision:', precision(refsets['non-fact-checkable'], testsets['non-fact-checkable']))
-    #print('non-fact-checkable recall:', recall(refsets['non-fact-checkable'], testsets['non-fact-checkable']))
-    #print('non-fact-checkable F-measure:', f_measure(refsets['non-fact-checkable'], testsets['non-fact-checkable']))
-
     print(description)
 
     # informative
@@ -110,6 +105,6 @@ if __name__ == "__main__":
     # Train again a model for specific metrics
     train_set, test_set = split_dataset(dataset)
     #text_classifier = nltk.NaiveBayesClassifier.train(train_set)
-    text_classifier = SklearnClassifier(BernoulliNB())
+    text_classifier = SklearnClassifier(XGBClassifier(max_depth=3, n_estimators=300, learning_rate=0.1))
     classifier = text_classifier.train(train_set)
     description = show_metrics(classifier,test_set)
