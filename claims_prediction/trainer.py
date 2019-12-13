@@ -99,12 +99,12 @@ def split_dataset(dataset):
 if __name__ == "__main__":
     # Load the dataset from pickles and extract features
     tagged_sentences = get_tagged_sentences(POS_TAGGED_FOLDER)
-    dataset = [(automatic_feature_extractor(sent['pos_tag'], pos_ngrams=False), sent['classification']) for sent in tagged_sentences]
+    dataset = [(automatic_feature_extractor(sent['pos_tag'], pos_ngrams=True), sent['classification']) for sent in tagged_sentences]
     
 
     # Train again a model for specific metrics
     train_set, test_set = split_dataset(dataset)
-    #text_classifier = nltk.NaiveBayesClassifier.train(train_set)
-    text_classifier = SklearnClassifier(XGBClassifier(max_depth=3, n_estimators=300, learning_rate=0.1))
+    text_classifier = nltk.NaiveBayesClassifier.train(train_set)
+    #text_classifier = SklearnClassifier(SVC())
     classifier = text_classifier.train(train_set)
     description = show_metrics(classifier,test_set)
